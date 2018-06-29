@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <include layout="@layout/toolbar" />
+
+    <LinearLayout
+        android:layout_marginTop="@dimen/dimen_16dp"
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <!-- Title -->
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_margin="@dimen/dimen_8dp"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/add_entry_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/dimen_8dp"
+                android:hint="@string/entry_title"
+                android:inputType="textCapSentences"
+                android:padding="@dimen/dimen_16dp"
+                android:textSize="@dimen/text_size_18sp" />
+        </android.support.design.widget.TextInputLayout>
+        <!-- End of Title -->
+
+        <!-- Text -->
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_margin="@dimen/dimen_8dp"
+            android:layout_height="match_parent">
+
+            <EditText
+                android:id="@+id/add_entry_text"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/dimen_8dp"
+                android:hint="@string/entry_text"
+                android:gravity="top"
+                android:inputType="textMultiLine"
+                android:padding="@dimen/dimen_16dp"
+                android:textSize="@dimen/text_size_18sp" />
+        </android.support.design.widget.TextInputLayout>
+        <!-- End of Text -->
+
+        </LinearLayout>
+</LinearLayout>

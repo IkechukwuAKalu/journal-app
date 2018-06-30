@@ -12,12 +12,12 @@ import android.view.ViewGroup;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.tasks.Task;
 import com.ikechukwuakalu.journalapp.R;
 import com.ikechukwuakalu.journalapp.base.BaseFragment;
 import com.ikechukwuakalu.journalapp.entries.EntriesActivity;
+import com.ikechukwuakalu.journalapp.utils.SigninUtil;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -45,6 +45,7 @@ public class AuthFragment extends BaseFragment implements AuthContract.View {
         super.onCreate(savedInstanceState);
         activity = ((AuthActivity) getActivity());
         if (activity != null) presenter = activity.getPresenter();
+        setupSignIn();
     }
 
     @Nullable
@@ -53,17 +54,12 @@ public class AuthFragment extends BaseFragment implements AuthContract.View {
         View view = inflater.inflate(R.layout.fragment_auth, container, false);
         unbinder = ButterKnife.bind(this, view);
         signInButton.setSize(SignInButton.SIZE_WIDE);
-        setupSignIn();
         return view;
     }
 
     private void setupSignIn() {
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder()
-                .requestEmail()
-                .requestProfile()
-                .build();
         Context context = getContext();
-        if (context != null) signInClient = GoogleSignIn.getClient(context, gso);
+        if (context != null) signInClient = GoogleSignIn.getClient(context, SigninUtil.getSignInOptions());
     }
 
     @Override
@@ -96,7 +92,10 @@ public class AuthFragment extends BaseFragment implements AuthContract.View {
 
         if (requestCode == SIGN_IN_CODE) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            if (presenter != null) presenter.performLogin(task);
+            if (presenter != null) {
+                presenter.attach(this);
+                presenter.performLogin(task);
+            }
         }
     }
 

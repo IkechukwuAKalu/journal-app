@@ -1,9 +1,12 @@
 package com.ikechukwuakalu.journalapp.entry_details;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -31,6 +34,8 @@ public class EntryDetailsFragment extends BaseFragment implements EntryDetailsCo
     @BindView(R.id.entry_title) TextView entryTitle;
     @BindView(R.id.entry_date) TextView entryDate;
     @BindView(R.id.entry_text) TextView entryText;
+
+    private JournalEntry journalEntry = null;
 
     private EntryDetailsActivity activity;
 
@@ -78,12 +83,33 @@ public class EntryDetailsFragment extends BaseFragment implements EntryDetailsCo
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_delete) {
-            if (presenter != null) presenter.deleteEntry(
-                    Integer.valueOf(activity.getEntryId()
-                    ));
+            Context context = getContext();
+            if (context != null) {
+                new AlertDialog.Builder(context)
+                        .setTitle("Confirm Delete")
+                        .setMessage("Are you sure you want to delete this entry?")
+                        .setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (presenter != null) presenter.deleteEntry(journalEntry);
+                            }
+                        })
+                        .setCancelable(false)
+                        .setIcon(R.drawable.ic_launcher_foreground)
+                        .show();
+            }
         } else if (id == R.id.action_edit) {
             Intent intent = new Intent(getContext(), AddEntryActivity.class);
-            intent.putExtra(AddEntryActivity.IS_EDIT, activity.getEntryId());
+            intent.putExtra(AddEntryActivity.EDIT_TITLE, journalEntry.getTitle());
+            intent.putExtra(AddEntryActivity.EDIT_TEXT, journalEntry.getText());
+            intent.putExtra(AddEntryActivity.EDIT_ID, journalEntry.getId());
+            intent.putExtra(AddEntryActivity.EDIT_CREATED, journalEntry.getCreatedAt());
             startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
@@ -98,7 +124,7 @@ public class EntryDetailsFragment extends BaseFragment implements EntryDetailsCo
     @Override
     public void hideLoading() {
         progressBar.setVisibility(View.GONE);
-        progressBar.setVisibility(View.VISIBLE);
+        scrollView.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -109,10 +135,12 @@ public class EntryDetailsFragment extends BaseFragment implements EntryDetailsCo
     @Override
     public void showDeleteSuccess() {
         showShortToast(getContext(), "Entry was successfully deleted");
+        activity.onBackPressed();
     }
 
     @Override
     public void showEntryDetails(JournalEntry journalEntry) {
+        this.journalEntry = journalEntry;
         entryTitle.setText(journalEntry.getTitle());
         entryDate.setText(journalEntry.getCreatedAt());
         entryText.setText(journalEntry.getText());

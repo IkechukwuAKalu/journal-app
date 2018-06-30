@@ -72,7 +72,8 @@ public class JournalEntry {
 
     @Override
     public String toString() {
-        return "JournalEntry(title: " + getTitle() +
+        return "JournalEntry(id: " + getId() +
+                " title: " + getTitle() +
                 " text: " + getText() +
                 " createdAt: " + getCreatedAt() + ")";
     }

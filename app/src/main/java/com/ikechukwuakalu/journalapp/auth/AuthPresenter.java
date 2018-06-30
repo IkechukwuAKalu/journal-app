@@ -17,16 +17,16 @@ public class AuthPresenter implements AuthContract.Presenter {
     private AuthContract.View view = null;
 
     AuthPresenter(Context context) {
-        spHelper = new UserSharedPreferenceHelper(context);
-        account = GoogleSignIn.getLastSignedInAccount(context);
+        this.spHelper = new UserSharedPreferenceHelper(context);
+        this.account = GoogleSignIn.getLastSignedInAccount(context);
     }
 
     @Override
     public void performLogin(Task<GoogleSignInAccount> task) {
         try {
             GoogleSignInAccount account = task.getResult(ApiException.class);
-            Logger.debug(account.getDisplayName() + " - " + account.getEmail());
             saveUserDetails(account);
+            Logger.debug(spHelper.getUserDetails().toString());
             if (view != null) view.showLoginSuccess();
         } catch (ApiException e) {
             Logger.error(e.getMessage());
@@ -39,15 +39,13 @@ public class AuthPresenter implements AuthContract.Presenter {
     private void saveUserDetails(GoogleSignInAccount account) {
         String photoUrl = null;
         if (account.getPhotoUrl() != null) photoUrl = account.getPhotoUrl().toString();
-        User user = new User(account.getId(),
+        User user = new User(
+                account.getId(),
                 account.getDisplayName(),
                 account.getEmail(),
-                photoUrl);
+                photoUrl
+        );
         spHelper.signInUser(user);
-
-        if (view != null) {
-            view.showLoginSuccess();
-        }
     }
 
     @Override

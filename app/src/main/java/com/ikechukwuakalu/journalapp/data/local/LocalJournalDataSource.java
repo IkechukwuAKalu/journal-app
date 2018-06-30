@@ -46,13 +46,32 @@ public class LocalJournalDataSource implements JournalDataSource{
     }
 
     @Override
-    public Observable<JournalEntry> edit(long id, JournalEntry updatedJournalEntry) {
-        return null;
+    public Completable edit(final JournalEntry... journalEntries) {
+        return Completable.fromAction(new Action() {
+            @Override
+            public void run() {
+                entryDao.edit(journalEntries);
+            }
+        });
     }
 
     @Override
-    public boolean remove(JournalEntry journalEntry) {
-        entryDao.remove(journalEntry);
-        return true;
+    public Completable remove(final JournalEntry journalEntry) {
+        return Completable.fromAction(new Action() {
+            @Override
+            public void run() {
+                entryDao.remove(journalEntry);
+            }
+        });
+    }
+
+    @Override
+    public Completable removeAll() {
+        return Completable.fromAction(new Action() {
+            @Override
+            public void run() {
+                entryDao.removeAll();
+            }
+        });
     }
 }

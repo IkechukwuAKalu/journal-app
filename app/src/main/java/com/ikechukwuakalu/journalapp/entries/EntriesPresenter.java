@@ -6,16 +6,15 @@ import android.support.annotation.NonNull;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.ikechukwuakalu.journalapp.data.JournalRepository;
+import com.ikechukwuakalu.journalapp.data.JournalDataSource;
 import com.ikechukwuakalu.journalapp.data.local.JournalEntry;
-import com.ikechukwuakalu.journalapp.data.local.LocalJournalDataSource;
 import com.ikechukwuakalu.journalapp.utils.Logger;
+import com.ikechukwuakalu.journalapp.utils.SigninUtil;
 import com.ikechukwuakalu.journalapp.utils.UserSharedPreferenceHelper;
 import com.ikechukwuakalu.journalapp.utils.espresso.EspressoIdlingResource;
-import com.ikechukwuakalu.journalapp.utils.rx.RxScheduler;
+import com.ikechukwuakalu.journalapp.utils.rx.BaseScheduler;
 
 import java.util.List;
 
@@ -26,22 +25,47 @@ import io.reactivex.functions.Consumer;
 
 public class EntriesPresenter implements EntriesContract.Presenter {
 
-    private JournalRepository repository;
+    private JournalDataSource repository;
     private GoogleSignInClient signInClient;
     private UserSharedPreferenceHelper spHelper;
-    private RxScheduler rxScheduler = new RxScheduler();
+    private BaseScheduler rxScheduler;
     private CompositeDisposable disposables = new CompositeDisposable();
 
     private EntriesContract.View view = null;
 
-    EntriesPresenter(Context context) {
-        this.repository = new JournalRepository(new LocalJournalDataSource(context));
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .requestProfile()
-                .build();
-        this.signInClient = GoogleSignIn.getClient(context, gso);
+    EntriesPresenter(Context context, JournalDataSource repository, BaseScheduler scheduler) {
+        this.repository = repository;
+        this.rxScheduler = scheduler;
+        this.signInClient = GoogleSignIn.getClient(context, SigninUtil.getSignInOptions());
         this.spHelper = new UserSharedPreferenceHelper(context);
+    }
+
+    @Override
+    public void deleteAllEntries() {
+        EspressoIdlingResource.increment();
+        Disposable disposable = repository.removeAll()
+                .subscribeOn(rxScheduler.io())
+                .observeOn(rxScheduler.ui())
+                .doFinally(new Action() {
+                    @Override
+                    public void run() {
+                        if (! EspressoIdlingResource.getIdlingResource().isIdleNow())
+                            EspressoIdlingResource.decrement();
+                    }
+                })
+                .subscribe(new Action() {
+                    @Override
+                    public void run() {
+                        if (view != null) view.showNoEntryFound();
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) {
+                        Logger.error(throwable.getMessage());
+                        if (view != null) view.showError(throwable.getMessage());
+                    }
+                });
+        disposables.add(disposable);
     }
 
     @Override
@@ -51,6 +75,7 @@ public class EntriesPresenter implements EntriesContract.Presenter {
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
                     spHelper.signUserOut();
+                    deleteAllEntries();
                     if (view != null) view.showSignOutSuccess();
                 } else {
                     if (view != null) view.showError("Unable to complete Sign out");
@@ -62,8 +87,12 @@ public class EntriesPresenter implements EntriesContract.Presenter {
     @Override
     public void attach(EntriesContract.View view) {
         this.view = view;
-        if (! spHelper.isUserSignedIn()) view.showAuthScreen();
-        else fetchEntries();
+        if (! spHelper.isUserSignedIn()) {
+            view.showAuthScreen();
+        } else {
+            view.showUserDetails(spHelper.getUserDetails());
+            fetchEntries();
+        }
     }
 
     private void fetchEntries() {

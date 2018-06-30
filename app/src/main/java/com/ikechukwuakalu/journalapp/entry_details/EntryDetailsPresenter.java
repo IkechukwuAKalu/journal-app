@@ -1,13 +1,10 @@
 package com.ikechukwuakalu.journalapp.entry_details;
 
-import android.content.Context;
-
-import com.ikechukwuakalu.journalapp.data.JournalRepository;
+import com.ikechukwuakalu.journalapp.data.JournalDataSource;
 import com.ikechukwuakalu.journalapp.data.local.JournalEntry;
-import com.ikechukwuakalu.journalapp.data.local.LocalJournalDataSource;
 import com.ikechukwuakalu.journalapp.utils.Logger;
 import com.ikechukwuakalu.journalapp.utils.espresso.EspressoIdlingResource;
-import com.ikechukwuakalu.journalapp.utils.rx.RxScheduler;
+import com.ikechukwuakalu.journalapp.utils.rx.BaseScheduler;
 
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
@@ -17,20 +14,49 @@ import io.reactivex.functions.Consumer;
 public class EntryDetailsPresenter implements EntryDetailsContract.Presenter{
 
     private String entryId;
-    private JournalRepository repository;
-    private RxScheduler rxScheduler = new RxScheduler();
+    private JournalDataSource repository;
+    private BaseScheduler rxScheduler;
     private CompositeDisposable disposables = new CompositeDisposable();
 
     private EntryDetailsContract.View view = null;
 
-    EntryDetailsPresenter(Context context, String entryId) {
+    EntryDetailsPresenter(JournalDataSource repository, String entryId, BaseScheduler scheduler) {
         this.entryId = entryId;
-        this.repository = new JournalRepository(new LocalJournalDataSource(context));
+        this.repository = repository;
+        this.rxScheduler = scheduler;
     }
 
     @Override
-    public void deleteEntry(int id) {
-        // TODO "Make an entry deletable"
+    public void deleteEntry(JournalEntry journalEntry) {
+        EspressoIdlingResource.increment();
+        Disposable disposable = repository.remove(journalEntry)
+                .subscribeOn(rxScheduler.io())
+                .observeOn(rxScheduler.ui())
+                .doFinally(new Action() {
+                    @Override
+                    public void run() {
+                        if (! EspressoIdlingResource.getIdlingResource().isIdleNow())
+                            EspressoIdlingResource.decrement();
+                    }
+                })
+                .subscribe(new Action() {
+                    @Override
+                    public void run() {
+                        if (view != null) {
+                            view.hideLoading();
+                            view.showDeleteSuccess();
+                        }
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) {
+                        if (view != null) {
+                            view.hideLoading();
+                            view.showError(throwable.getMessage());
+                        }
+                    }
+                });
+        disposables.add(disposable);
     }
 
     @Override
@@ -59,6 +85,7 @@ public class EntryDetailsPresenter implements EntryDetailsContract.Presenter{
                     @Override
                     public void accept(JournalEntry journalEntry) {
                         if (view != null) {
+                            view.hideLoading();
                             if (journalEntry != null) view.showEntryDetails(journalEntry);
                             else view.showError("Journal Entry not found");
                         }
@@ -67,7 +94,10 @@ public class EntryDetailsPresenter implements EntryDetailsContract.Presenter{
                     @Override
                     public void accept(Throwable throwable) {
                         Logger.error(throwable.getMessage());
-                        if (view != null) view.showError(throwable.getMessage());
+                        if (view != null) {
+                            view.hideLoading();
+                            view.showError(throwable.getMessage());
+                        }
                     }
                 });
         disposables.add(disposable);

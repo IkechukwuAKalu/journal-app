@@ -12,7 +12,7 @@ public interface JournalDataSource {
     /**
      * Creates a new Journal entry
      * @param journalEntry the Journal Entry Object
-     * @return true if it was successful, else false
+     * @return void
      */
     Completable add(JournalEntry journalEntry);
 
@@ -31,16 +31,21 @@ public interface JournalDataSource {
 
     /**
      * Modifies the content of a Journal entry
-     * @param id the Medication ID
-     * @param updatedJournalEntry the new Journal entry Object
-     * @return the updated Journal entry Object
+     * @param journalEntries the new Journal entry Object
+     * @return void
      */
-    Observable<JournalEntry> edit(long id, JournalEntry updatedJournalEntry);
+    Completable edit(JournalEntry... journalEntries);
 
     /**
      * Removes a Journal entry
      * @param journalEntry the Journal entry Object. Passing null removes EVERY entry
-     * @return true if removal was successful, else false
+     * @return void
      */
-    boolean remove(JournalEntry journalEntry);
+    Completable remove(JournalEntry journalEntry);
+
+    /**
+     * Removes all Journal entries
+     * @return void
+     */
+    Completable removeAll();
 }

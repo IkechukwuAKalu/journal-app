@@ -5,11 +5,10 @@ import android.support.annotation.Nullable;
 
 import com.ikechukwuakalu.journalapp.R;
 import com.ikechukwuakalu.journalapp.base.BaseActivity;
-import com.ikechukwuakalu.journalapp.base.BaseFragment;
 
 public class AuthActivity extends BaseActivity {
 
-    private BaseFragment fragment = null;
+    private AuthFragment fragment = null;
     private AuthPresenter presenter = null;
 
     @Override

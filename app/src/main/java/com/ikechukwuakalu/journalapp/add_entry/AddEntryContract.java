@@ -7,8 +7,6 @@ import com.ikechukwuakalu.journalapp.data.local.JournalEntry;
 public interface AddEntryContract {
 
     interface View extends BaseView {
-        void populateFields(JournalEntry journalEntry);
-
         void showSaveSuccess();
 
         void showSaveError(String message);

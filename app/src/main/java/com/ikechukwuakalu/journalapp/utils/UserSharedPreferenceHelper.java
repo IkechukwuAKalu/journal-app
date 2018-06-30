@@ -8,6 +8,8 @@ import com.ikechukwuakalu.journalapp.data.models.User;
 
 public class UserSharedPreferenceHelper {
 
+    public static final String SP_NAME = "My-Journal-App-SP";
+
     private final String USER_ID = "user_id";
     private final String USER_NAME = "user_name";
     private final String USER_EMAIL = "user_email";
@@ -16,7 +18,6 @@ public class UserSharedPreferenceHelper {
     private SharedPreferences preferences;
 
     public UserSharedPreferenceHelper(Context context) {
-        String SP_NAME = "My-Journal-App-SP";
         preferences = context.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE);
     }
 
@@ -26,6 +27,7 @@ public class UserSharedPreferenceHelper {
 
     public void signInUser(User user) {
         SharedPreferences.Editor editor = preferences.edit();
+        editor.clear();
         addUserDetails(user, editor);
         editor.apply();
     }

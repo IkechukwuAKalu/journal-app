@@ -1,5 +1,6 @@
 package com.ikechukwuakalu.journalapp.add_entry;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -34,6 +35,8 @@ public class AddEntryFragment extends BaseFragment implements AddEntryContract.V
     private AddEntryActivity activity;
     private AddEntryPresenter presenter = null;
     private boolean isEdit;
+    private String passedCreatedAt;
+    private int passedId;
 
     public AddEntryFragment() {}
 
@@ -51,7 +54,15 @@ public class AddEntryFragment extends BaseFragment implements AddEntryContract.V
         ButterKnife.bind(this, layout);
         setUpToolbar(toolbar, getResources().getDrawable(R.drawable.ic_close_white_24dp));
         setHasOptionsMenu(true);
-        isEdit = activity.getIntent().getBooleanExtra(AddEntryActivity.IS_EDIT, false);
+        String passedTitle = activity.getIntent().getStringExtra(AddEntryActivity.EDIT_TITLE);
+        String passedText = activity.getIntent().getStringExtra(AddEntryActivity.EDIT_TEXT);
+        passedId = activity.getIntent().getIntExtra(AddEntryActivity.EDIT_ID, 0);
+        passedCreatedAt = activity.getIntent().getStringExtra(AddEntryActivity.EDIT_CREATED);
+        isEdit = passedTitle != null;
+        if (isEdit) {
+            activity.setTitle("Edit Entry");
+            populateFields(new JournalEntry(passedTitle, passedText));
+        }
         return layout;
     }
 
@@ -79,43 +90,55 @@ public class AddEntryFragment extends BaseFragment implements AddEntryContract.V
             if (entryTitle.getText().toString().trim().isEmpty() &&
                     entryText.getText().toString().trim().isEmpty()) {
                 activity.onBackPressed();
-                activity.overridePendingTransition(android.R.anim.fade_in, R.anim.slide_down);
                 return true;
             }
-            new AlertDialog.Builder(activity.getApplicationContext())
-                    .setTitle("Confirm exit")
-                    .setMessage("Are you sure you want to exit?")
-                    .setNegativeButton("NO", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    })
-                    .setPositiveButton("YES", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            activity.onBackPressed();
-                            activity.overridePendingTransition(android.R.anim.fade_in, R.anim.slide_down);
-                        }
-                    })
-                    .show();
+            Context context = getContext();
+            if (context != null) {
+                new AlertDialog.Builder(context)
+                        .setTitle("Confirm exit")
+                        .setMessage("Are you sure you want to exit?")
+                        .setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                activity.onBackPressed();
+                            }
+                        })
+                        .setCancelable(false)
+                        .setIcon(R.drawable.ic_launcher_foreground)
+                        .show();
+            }
         } else if (id == R.id.action_save_entry) {
-            String title = entryTitle.getText().toString();
-            String text = entryText.getText().toString();
+            String title = entryTitle.getText().toString().trim();
+            String text = entryText.getText().toString().trim();
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyy", Locale.US);
-            Calendar calendar = Calendar.getInstance();
-            String createdAt = dateFormat.format(calendar.getTime());
 
-            if (presenter != null){
-                if (isEdit) presenter.editEntry(new JournalEntry(title, text));
-                else presenter.saveEntry(new JournalEntry(title, text, createdAt));
+            if (title.isEmpty() || text.isEmpty()) {
+                showLongToast(getContext(), "Title and Text cannot be empty");
+            } else {
+                if (presenter != null){
+                    Calendar calendar = Calendar.getInstance();
+                    String createdAt = dateFormat.format(calendar.getTime());
+                    if (isEdit) {
+                        JournalEntry journalEntry = new JournalEntry(title, text, passedCreatedAt);
+                        journalEntry.setId(passedId);
+                        presenter.editEntry(journalEntry);
+                    }
+                    else {
+                        presenter.saveEntry(new JournalEntry(title, text, createdAt));
+                    }
+                }
             }
         }
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void populateFields(JournalEntry journalEntry) {
+    private void populateFields(JournalEntry journalEntry) {
         entryTitle.setText(journalEntry.getTitle());
         entryText.setText(journalEntry.getText());
     }

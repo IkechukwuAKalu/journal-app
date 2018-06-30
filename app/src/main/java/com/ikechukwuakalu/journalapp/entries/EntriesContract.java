@@ -26,6 +26,8 @@ public interface EntriesContract {
     }
 
     interface Presenter extends BasePresenter<View> {
+        void deleteAllEntries();
+
         void signOutUser(Activity activity);
     }
 }

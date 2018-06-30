@@ -23,8 +23,11 @@ public interface JournalEntryDao {
     Flowable<JournalEntry> getById(int id);
 
     @Update
-    void edit(JournalEntry oldEntry, JournalEntry newEntry);
+    void edit(JournalEntry... journalEntries);
 
     @Delete
     void remove(JournalEntry journalEntry);
+
+    @Query("DELETE FROM journalentry")
+    void removeAll();
 }

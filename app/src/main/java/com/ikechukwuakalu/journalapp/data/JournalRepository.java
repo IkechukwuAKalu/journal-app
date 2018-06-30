@@ -31,12 +31,17 @@ public class JournalRepository implements JournalDataSource {
     }
 
     @Override
-    public Observable<JournalEntry> edit(long id, JournalEntry updatedJournalEntry) {
-        return dataSource.edit(id, updatedJournalEntry);
+    public Completable edit(JournalEntry... journalEntries) {
+        return dataSource.edit(journalEntries);
     }
 
     @Override
-    public boolean remove(JournalEntry journalEntry) {
+    public Completable remove(JournalEntry journalEntry) {
         return dataSource.remove(journalEntry);
+    }
+
+    @Override
+    public Completable removeAll() {
+        return dataSource.removeAll();
     }
 }

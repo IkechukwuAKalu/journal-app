@@ -1,14 +1,21 @@
 package com.ikechukwuakalu.journalapp.entries;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -51,7 +58,8 @@ public class EntriesFragment extends BaseFragment implements EntriesContract.Vie
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.fragment_entries, container, false);
         ButterKnife.bind(this, layout);
-        setUpToolbar(toolbar, null);
+        activity.setSupportActionBar(toolbar);
+        setHasOptionsMenu(true);
         return layout;
     }
 
@@ -65,6 +73,62 @@ public class EntriesFragment extends BaseFragment implements EntriesContract.Vie
     public void onPause() {
         super.onPause();
         if (presenter != null) presenter.detach();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_entries, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_delete_all) {
+            Context context = getContext();
+            if (context != null) {
+                new AlertDialog.Builder(context)
+                        .setTitle("Confirm Delete")
+                        .setMessage("Are you sure you want to delete all your Journal entries?")
+                        .setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (presenter != null) presenter.deleteAllEntries();
+                            }
+                        })
+                        .setCancelable(false)
+                        .setIcon(R.drawable.ic_delete_forever_black_24dp)
+                        .show();
+            }
+        } else if (id == R.id.action_signout) {
+            Context context = getContext();
+            if (context != null) {
+                new AlertDialog.Builder(context)
+                        .setTitle("Confirm Sign out")
+                        .setMessage("Signing out deletes all your Journal entries. Continue?")
+                        .setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (presenter != null) presenter.signOutUser(getActivity());
+                            }
+                        })
+                        .setCancelable(false)
+                        .setIcon(R.drawable.ic_account_circle_black_24dp)
+                        .show();
+            }
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @OnClick(R.id.add_new_entry)
@@ -93,7 +157,11 @@ public class EntriesFragment extends BaseFragment implements EntriesContract.Vie
 
     @Override
     public void showUserDetails(User user) {
-        // TODO "Show some user details in the navigation view"
+        ActionBar actionBar = activity.getSupportActionBar();
+        if (actionBar != null) {
+            String subtitle = user.getName() + " - " + user.getEmail();
+            actionBar.setSubtitle(subtitle);
+        }
     }
 
     @Override

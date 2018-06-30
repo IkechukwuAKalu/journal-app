@@ -14,6 +14,7 @@ android:layout_height="match_parent">
     <android.support.v7.widget.RecyclerView
         android:id="@+id/entries_rv"
         android:visibility="gone"
+        android:scrollbars="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="@dimen/dimen_16dp"/>
@@ -22,6 +23,7 @@ android:layout_height="match_parent">
         android:id="@+id/no_entry_tv"
         android:layout_width="match_parent"
         android:padding="@dimen/dimen_16dp"
+        android:visibility="gone"
         android:layout_height="match_parent"
         android:text="@string/no_entry_text"
         android:gravity="center"

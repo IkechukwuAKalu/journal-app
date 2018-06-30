@@ -5,6 +5,9 @@ import android.support.annotation.Nullable;
 
 import com.ikechukwuakalu.journalapp.R;
 import com.ikechukwuakalu.journalapp.base.BaseActivity;
+import com.ikechukwuakalu.journalapp.data.JournalRepository;
+import com.ikechukwuakalu.journalapp.data.local.LocalJournalDataSource;
+import com.ikechukwuakalu.journalapp.utils.rx.RxScheduler;
 
 public class EntryDetailsActivity extends BaseActivity {
 
@@ -23,7 +26,11 @@ public class EntryDetailsActivity extends BaseActivity {
         if (fragment == null) fragment = new EntryDetailsFragment();
 
         entryId = getIntent().getStringExtra(ENTRY_ID);
-        if (presenter == null) presenter = new EntryDetailsPresenter(getApplicationContext(), entryId);
+        if (presenter == null) presenter = new EntryDetailsPresenter(
+                new JournalRepository(new LocalJournalDataSource(getApplicationContext())),
+                entryId,
+                new RxScheduler()
+        );
 
         addFragment(fragment, R.id.container);
     }

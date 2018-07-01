@@ -65,7 +65,10 @@ public class EntryDetailsFragment extends BaseFragment implements EntryDetailsCo
     @Override
     public void onResume() {
         super.onResume();
-        if (presenter != null) presenter.attach(this);
+        if (presenter != null) {
+            presenter.attach(this);
+            presenter.fetchDetails();
+        }
     }
 
     @Override
@@ -101,7 +104,7 @@ public class EntryDetailsFragment extends BaseFragment implements EntryDetailsCo
                             }
                         })
                         .setCancelable(false)
-                        .setIcon(R.drawable.ic_launcher_foreground)
+                        .setIcon(R.drawable.ic_delete_forever_black_24dp)
                         .show();
             }
         } else if (id == R.id.action_edit) {

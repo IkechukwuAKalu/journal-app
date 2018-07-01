@@ -1,17 +1,14 @@
 package com.ikechukwuakalu.journalapp.entries;
 
 import android.app.Activity;
-import android.content.Context;
 import android.support.annotation.NonNull;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.ikechukwuakalu.journalapp.data.JournalDataSource;
 import com.ikechukwuakalu.journalapp.data.local.JournalEntry;
 import com.ikechukwuakalu.journalapp.utils.Logger;
-import com.ikechukwuakalu.journalapp.utils.SigninUtil;
 import com.ikechukwuakalu.journalapp.utils.UserSharedPreferenceHelper;
 import com.ikechukwuakalu.journalapp.utils.espresso.EspressoIdlingResource;
 import com.ikechukwuakalu.journalapp.utils.rx.BaseScheduler;
@@ -33,11 +30,11 @@ public class EntriesPresenter implements EntriesContract.Presenter {
 
     private EntriesContract.View view = null;
 
-    EntriesPresenter(Context context, JournalDataSource repository, BaseScheduler scheduler) {
+    EntriesPresenter(JournalDataSource repository, UserSharedPreferenceHelper spHelper, GoogleSignInClient signInClient, BaseScheduler scheduler) {
         this.repository = repository;
         this.rxScheduler = scheduler;
-        this.signInClient = GoogleSignIn.getClient(context, SigninUtil.getSignInOptions());
-        this.spHelper = new UserSharedPreferenceHelper(context);
+        this.signInClient = signInClient;
+        this.spHelper = spHelper;
     }
 
     @Override

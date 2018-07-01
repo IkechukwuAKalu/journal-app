@@ -19,6 +19,8 @@ public interface EntryDetailsContract {
     }
 
     interface Presenter extends BasePresenter<View> {
+        void fetchDetails();
+
         void deleteEntry(JournalEntry journalEntry);
     }
 }

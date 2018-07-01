@@ -2,7 +2,7 @@ package com.ikechukwuakalu.journalapp.utils;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 
-public class SigninUtil {
+public class SignInUtil {
 
     private static GoogleSignInOptions signInOptions = null;
 

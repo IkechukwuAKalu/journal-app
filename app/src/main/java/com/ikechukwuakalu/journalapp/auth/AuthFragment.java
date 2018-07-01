@@ -17,7 +17,7 @@ import com.google.android.gms.tasks.Task;
 import com.ikechukwuakalu.journalapp.R;
 import com.ikechukwuakalu.journalapp.base.BaseFragment;
 import com.ikechukwuakalu.journalapp.entries.EntriesActivity;
-import com.ikechukwuakalu.journalapp.utils.SigninUtil;
+import com.ikechukwuakalu.journalapp.utils.SignInUtil;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -59,7 +59,7 @@ public class AuthFragment extends BaseFragment implements AuthContract.View {
 
     private void setupSignIn() {
         Context context = getContext();
-        if (context != null) signInClient = GoogleSignIn.getClient(context, SigninUtil.getSignInOptions());
+        if (context != null) signInClient = GoogleSignIn.getClient(context, SignInUtil.getSignInOptions());
     }
 
     @Override

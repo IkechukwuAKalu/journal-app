@@ -96,7 +96,7 @@ public class AddEntryFragment extends BaseFragment implements AddEntryContract.V
             if (context != null) {
                 new AlertDialog.Builder(context)
                         .setTitle("Confirm exit")
-                        .setMessage("Are you sure you want to exit?")
+                        .setMessage("Leaving this screen discards all data. Continue?")
                         .setNegativeButton("NO", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {

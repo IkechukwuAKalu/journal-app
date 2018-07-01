@@ -13,6 +13,9 @@ import io.reactivex.functions.Consumer;
 
 public class EntryDetailsPresenter implements EntryDetailsContract.Presenter{
 
+    public static final String MSG_ENTRY_NOT_FOUND = "Journal Entry not found";
+    public static final String MSG_ID_IS_NULL = "Invalid entry ID";
+
     private String entryId;
     private JournalDataSource repository;
     private BaseScheduler rxScheduler;
@@ -62,12 +65,12 @@ public class EntryDetailsPresenter implements EntryDetailsContract.Presenter{
     @Override
     public void attach(EntryDetailsContract.View view) {
         this.view = view;
-        fetchEntryDetails();
     }
 
-    private void fetchEntryDetails() {
+    @Override
+    public void fetchDetails() {
         if (this.entryId == null) {
-            if (view != null) view.showError("Invalid entry ID");
+            if (view != null) view.showError(MSG_ID_IS_NULL);
             return;
         }
         EspressoIdlingResource.increment();
@@ -87,7 +90,7 @@ public class EntryDetailsPresenter implements EntryDetailsContract.Presenter{
                         if (view != null) {
                             view.hideLoading();
                             if (journalEntry != null) view.showEntryDetails(journalEntry);
-                            else view.showError("Journal Entry not found");
+                            else view.showError(MSG_ENTRY_NOT_FOUND);
                         }
                     }
                 }, new Consumer<Throwable>() {

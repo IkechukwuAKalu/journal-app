@@ -10,20 +10,27 @@ import java.util.Map;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.functions.Action;
 
-public class FakeJournalRepository implements JournalDataSource {
+public class FakeJournalDataSource implements JournalDataSource {
 
     private Map<String, JournalEntry> journalEntries = new HashMap<>();
 
     @Override
-    public Completable add(JournalEntry journalEntry) {
-        journalEntries.put(String.valueOf(journalEntry.getId()), journalEntry);
-        return Completable.complete();
+    public Completable add(final JournalEntry journalEntry) {
+        return Completable.fromAction(new Action() {
+            @Override
+            public void run() {
+                journalEntries.put(String.valueOf(journalEntry.getId()), journalEntry);
+            }
+        });
     }
 
     @Override
     public Observable<JournalEntry> getEntry(int id) {
-        return Observable.just(journalEntries.get(String.valueOf(id)));
+        return Observable.just(
+                journalEntries.get(String.valueOf(id))
+        );
     }
 
     @Override
@@ -33,13 +40,44 @@ public class FakeJournalRepository implements JournalDataSource {
     }
 
     @Override
-    public Observable<JournalEntry> edit(long id, JournalEntry updatedJournalEntry) {
-        return null;
+    public Completable edit(final JournalEntry... entries) {
+        return Completable.fromAction(new Action() {
+            @Override
+            public void run() {
+                for (JournalEntry entry : entries) {
+                    if (journalEntries.containsKey(String.valueOf(entry.getId()))) {
+                        JournalEntry entry1 = journalEntries.get(String.valueOf(entry.getId()));
+                        entry1.setTitle(entry.getTitle());
+                        entry1.setText(entry.getText());
+                        journalEntries.remove(String.valueOf(entry.getId()));
+                        journalEntries.put(String.valueOf(entry.getId()), entry1);
+                    }
+                }
+            }
+        });
     }
 
     @Override
-    public boolean remove(JournalEntry journalEntry) {
-        journalEntries.remove(String.valueOf(journalEntry.getId()));
-        return true;
+    public Completable remove(final JournalEntry journalEntry) {
+        return Completable.fromAction(new Action() {
+            @Override
+            public void run() {
+                journalEntries.remove(String.valueOf(journalEntry.getId()));
+            }
+        });
+    }
+
+    public Map<String, JournalEntry> getJournalEntries() {
+        return journalEntries;
+    }
+
+    @Override
+    public Completable removeAll() {
+        return Completable.fromAction(new Action() {
+            @Override
+            public void run() {
+                journalEntries.clear();
+            }
+        });
     }
 }

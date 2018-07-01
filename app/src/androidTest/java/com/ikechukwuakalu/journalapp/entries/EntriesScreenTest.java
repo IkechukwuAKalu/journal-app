@@ -7,7 +7,6 @@ import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.ikechukwuakalu.journalapp.R;
-import com.ikechukwuakalu.journalapp.add_entry.RecyclerViewAction;
 
 import org.junit.After;
 import org.junit.Before;
@@ -59,7 +58,7 @@ public class EntriesScreenTest {
         // click on FAB
         onView(withId(R.id.add_new_entry))
                 .perform(click());
-        // add test dat to fields
+        // add test data to fields
         onView(withId(R.id.add_entry_title))
                 .perform(typeText("Test title"));
         onView(withId(R.id.add_entry_text))

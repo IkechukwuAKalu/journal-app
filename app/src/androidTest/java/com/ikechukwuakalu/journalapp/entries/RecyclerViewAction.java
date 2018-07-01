@@ -1,4 +1,4 @@
-package com.ikechukwuakalu.journalapp.add_entry;
+package com.ikechukwuakalu.journalapp.entries;
 
 import android.support.test.espresso.UiController;
 import android.support.test.espresso.ViewAction;

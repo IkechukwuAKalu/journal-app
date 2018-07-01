@@ -43,16 +43,11 @@ public class EntriesPresenter implements EntriesContract.Presenter {
         Disposable disposable = repository.removeAll()
                 .subscribeOn(rxScheduler.io())
                 .observeOn(rxScheduler.ui())
-                .doFinally(new Action() {
+                .subscribe(new Action() {
                     @Override
                     public void run() {
                         if (! EspressoIdlingResource.getIdlingResource().isIdleNow())
                             EspressoIdlingResource.decrement();
-                    }
-                })
-                .subscribe(new Action() {
-                    @Override
-                    public void run() {
                         if (view != null) view.showNoEntryFound();
                     }
                 }, new Consumer<Throwable>() {
@@ -97,16 +92,11 @@ public class EntriesPresenter implements EntriesContract.Presenter {
         Disposable disposable = repository.getEntries()
                 .subscribeOn(rxScheduler.io())
                 .observeOn(rxScheduler.ui())
-                .doFinally(new Action() {
-                    @Override
-                    public void run() {
-                        if (! EspressoIdlingResource.getIdlingResource().isIdleNow())
-                            EspressoIdlingResource.decrement();
-                    }
-                })
                 .subscribe(new Consumer<List<JournalEntry>>() {
                     @Override
                     public void accept(List<JournalEntry> entries) {
+                        if (! EspressoIdlingResource.getIdlingResource().isIdleNow())
+                            EspressoIdlingResource.decrement();
                         if (view != null) {
                             if (entries.size() > 0) view.showEntries(entries);
                             else view.showNoEntryFound();

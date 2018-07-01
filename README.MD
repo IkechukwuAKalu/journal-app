@@ -4,3 +4,4 @@ This is an Android application for the Andela Learning community 3 (ALC3), which
 
 The aim of this project is to create an Journal or Diary application where users can log in with Google authentication, create diary entries, view the save entries, modify them and also delete them if they wish.
 
+### [Download the APK here](https://github.com/IkechukwuAKalu/journal-app/blob/master/JournalApp.apk)
